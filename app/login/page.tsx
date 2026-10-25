@@ -194,11 +194,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-          <p className="font-semibold text-slate-700">Demo accounts</p>
-          <p className="mt-1">Student: student@collegefix.test / student123</p>
-          <p>Admin: admin@collegefix.test / admin123</p>
-        </div>
+        {!isSignUp && (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+            <p className="font-semibold text-slate-700">Demo accounts</p>
+            <p className="mt-1">Student: student@collegefix.test / student123</p>
+            <p>Admin: admin@collegefix.test / admin123</p>
+          </div>
+        )}
 
         <p className="mt-6 text-center text-sm text-slate-600">
           {isSignUp ? "Already have an account?" : "New student?"}{" "}
