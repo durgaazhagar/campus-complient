@@ -18,11 +18,7 @@ export function useRole() {
     function applySession(session: Session | null) {
       if (!active) return;
       setUserId(session?.user.id ?? null);
-      const accountRole =
-        session?.user.app_metadata?.role ??
-        session?.user.user_metadata?.role ??
-        session?.user.user_metadata?.["role"] ??
-        null;
+      const accountRole = session?.user.app_metadata?.role;
 
       setRoleState(
         !session

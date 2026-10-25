@@ -64,11 +64,7 @@ export default function LoginPage() {
           return;
         }
 
-        const roleFromAuth =
-          data.user.app_metadata?.role ??
-          data.user.user_metadata?.role ??
-          data.user.user_metadata?.["role"] ??
-          "student";
+        const roleFromAuth = data.user.app_metadata?.role;
 
         router.replace(roleFromAuth === "admin" ? "/admin" : "/");
       }
