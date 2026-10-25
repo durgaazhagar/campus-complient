@@ -3,7 +3,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, EyeOff, GraduationCap, Wrench } from "lucide-react";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  ShieldCheck,
+  Wrench,
+} from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/lib/supabase-client";
 
@@ -13,16 +20,19 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"student" | "admin">(
+    "student",
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    if (!roleLoading && role) {
+    if (!roleLoading && !loading && role) {
       router.replace(role === "admin" ? "/admin" : "/");
     }
-  }, [role, roleLoading, router]);
+  }, [loading, role, roleLoading, router]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,7 +45,6 @@ export default function LoginPage() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { role: "student" } },
         });
 
         if (signUpError) {
@@ -65,8 +74,32 @@ export default function LoginPage() {
         }
 
         const roleFromAuth = data.user.app_metadata?.role;
+        const authenticatedRole =
+          roleFromAuth === "admin"
+            ? "admin"
+            : roleFromAuth === undefined || roleFromAuth === "student"
+              ? "student"
+              : null;
 
-        router.replace(roleFromAuth === "admin" ? "/admin" : "/");
+        if (authenticatedRole !== selectedRole) {
+          const { error: signOutError } = await supabase.auth.signOut();
+          if (signOutError) {
+            console.error("Could not end mismatched-role session:", signOutError);
+            setError(
+              "Your account role does not match this sign-in option. Please try again or contact your administrator.",
+            );
+            return;
+          }
+
+          setError(
+            authenticatedRole
+              ? `This account is registered as ${authenticatedRole}. Choose ${authenticatedRole} sign in instead.`
+              : "This account does not have an authorized role. Contact your system administrator.",
+          );
+          return;
+        }
+
+        router.replace(authenticatedRole === "admin" ? "/admin" : "/");
       }
     } catch (submitError) {
       console.error("Authentication failed:", submitError);
@@ -103,6 +136,44 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!isSignUp && (
+            <fieldset>
+              <legend className="mb-2 block text-sm font-medium text-slate-700">
+                Sign in as
+              </legend>
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                {(
+                  [
+                    {
+                      role: "student",
+                      label: "Student",
+                      Icon: GraduationCap,
+                    },
+                    { role: "admin", label: "Admin", Icon: ShieldCheck },
+                  ] as const
+                ).map(({ role: option, label, Icon }) => (
+                  <button
+                    key={option}
+                    type="button"
+                    aria-pressed={selectedRole === option}
+                    onClick={() => {
+                      setSelectedRole(option);
+                      setError("");
+                    }}
+                    className={`flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition ${
+                      selectedRole === option
+                        ? "bg-white text-blue-700 shadow-sm"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
           <label className="block text-sm font-medium text-slate-700">
             Email address
             <input

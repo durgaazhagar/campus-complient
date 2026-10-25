@@ -9,9 +9,33 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+const cookieStorage = {
+  getItem(key: string) {
+    if (typeof document === "undefined") return null;
+
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((cookie) => cookie.startsWith(`${key}=`));
+
+    return cookieValue ? decodeURIComponent(cookieValue.split("=").slice(1).join("=")) : null;
+  },
+  setItem(key: string, value: string) {
+    if (typeof document === "undefined") return;
+
+    const isSecure = window.location.protocol === "https:";
+    document.cookie = `${key}=${encodeURIComponent(value)}; path=/; SameSite=Lax${isSecure ? "; secure" : ""}`;
+  },
+  removeItem(key: string) {
+    if (typeof document === "undefined") return;
+
+    document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+  },
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
+    storage: cookieStorage,
   },
 });
 
