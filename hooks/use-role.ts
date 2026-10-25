@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase-client";
-import { getDemoSession } from "@/lib/demo-auth";
 
 export type Role = "student" | "admin" | null;
 
@@ -15,14 +14,6 @@ export function useRole() {
   useEffect(() => {
     let active = true;
     let authEventReceived = false;
-
-    const demoSession = getDemoSession();
-    if (demoSession) {
-      setUserId(demoSession.userId ?? null);
-      setRoleState(demoSession.role);
-      setLoading(false);
-      return;
-    }
 
     function applySession(session: Session | null) {
       if (!active) return;

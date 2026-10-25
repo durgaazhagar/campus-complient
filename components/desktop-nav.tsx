@@ -18,7 +18,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/lib/supabase-client";
-import { clearDemoSession } from "@/lib/demo-auth";
 import { toast } from "sonner";
 
 const defaultLinks = [
@@ -44,7 +43,6 @@ export function DesktopNav() {
   if (pathname === "/login" || roleLoading || !role) return null;
 
   async function handleSignOut() {
-    clearDemoSession();
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Could not sign out:", error);

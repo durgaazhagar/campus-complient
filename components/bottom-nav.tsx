@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase-client";
-import { clearDemoSession } from "@/lib/demo-auth";
 import { toast } from "sonner";
 
 const studentLinks = [
@@ -40,7 +39,6 @@ export function BottomNav() {
   if (pathname === "/login" || loading || !role) return null;
 
   async function handleSignOut() {
-    clearDemoSession();
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Could not sign out:", error);

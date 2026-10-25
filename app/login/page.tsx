@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, GraduationCap, Wrench } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { supabase } from "@/lib/supabase-client";
-import { resolveDemoAccount, setDemoSession } from "@/lib/demo-auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,13 +31,6 @@ export default function LoginPage() {
     setNotice("");
 
     try {
-      const demoAccount = resolveDemoAccount(email, password);
-      if (demoAccount) {
-        setDemoSession(demoAccount.role);
-        router.replace(demoAccount.role === "admin" ? "/admin" : "/");
-        return;
-      }
-
       if (isSignUp) {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
@@ -65,7 +57,7 @@ export default function LoginPage() {
         if (signInError) {
           const invalidCredentialMessage =
             signInError.message.includes("Invalid login credentials")
-              ? "Invalid login credentials. If you just created an account, confirm the email first or use one of the demo accounts below."
+              ? "Invalid login credentials. If you just created an account, confirm your email first."
               : signInError.message;
 
           setError(invalidCredentialMessage);
@@ -193,14 +185,6 @@ export default function LoginPage() {
             {!loading && <ArrowRight className="h-4 w-4" />}
           </button>
         </form>
-
-        {!isSignUp && (
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-            <p className="font-semibold text-slate-700">Demo accounts</p>
-            <p className="mt-1">Student: student@collegefix.test / student123</p>
-            <p>Admin: admin@collegefix.test / admin123</p>
-          </div>
-        )}
 
         <p className="mt-6 text-center text-sm text-slate-600">
           {isSignUp ? "Already have an account?" : "New student?"}{" "}
